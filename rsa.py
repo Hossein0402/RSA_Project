@@ -24,11 +24,31 @@ def generate_key_pair(prime1, prime2):
     return public_key, private_key
 
 
-def encrypt(public_key, message):
-    exponent, modulus = public_key
-    return pow(message, exponent, modulus)
+def text_to_blocks(text, block_size):
+    byte_data = text.encode('utf-8')
+    blocks = [
+        int.from_bytes(byte_data[i:i + block_size], byteorder='big')
+        for i in range(0, len(byte_data), block_size)
+    ]
+    return blocks
 
 
-def decrypt(private_key, ciphertext):
-    exponent, modulus = private_key
-    return pow(ciphertext, exponent, modulus)
+def blocks_to_text(blocks, block_size):
+    byte_data = b''.join(
+        block.to_bytes(block_size, byteorder='big') for block in blocks
+    )
+    return byte_data.decode('utf-8')
+
+
+def encrypt_text(public_key, plaintext):
+    e, n = public_key
+    max_block_size = (n.bit_length() - 1) // 8
+    blocks = text_to_blocks(plaintext, max_block_size)
+    encrypted_blocks = [pow(block, e, n) for block in blocks]
+    return encrypted_blocks, max_block_size
+
+
+def decrypt_text(private_key, ciphertext_blocks, block_size):
+    d, n = private_key
+    decrypted_blocks = [pow(block, d, n) for block in ciphertext_blocks]
+    return blocks_to_text(decrypted_blocks, block_size)
