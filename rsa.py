@@ -22,3 +22,13 @@ def generate_key_pair(prime1, prime2):
     private_key = (private_exponent, modulus)
 
     return public_key, private_key
+
+
+def encrypt(public_key, message):
+    exponent, modulus = public_key
+    return pow(message, exponent, modulus)
+
+
+def decrypt(private_key, ciphertext):
+    exponent, modulus = private_key
+    return pow(ciphertext, exponent, modulus)
